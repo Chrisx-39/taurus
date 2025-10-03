@@ -7,7 +7,6 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<!-- Favicon for Browser Tab -->
 <link rel="icon" href="https://i.ibb.co/Wp6mVV1d/logo-Recovered.png" type="image/png">
 
 <style>
@@ -15,22 +14,23 @@ body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e5e5e5; sc
 h1,h2,h3 { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
 
 /* Glassmorphism panels */
-.glass { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(12px); border-radius: 1rem; }
+.glass { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(12px); border-radius: 1rem; transition: all 0.3s ease; }
+.glass:hover { background: rgba(255, 255, 255, 0.1); }
 
 /* Neon gradient */
 .neon-gradient { background: linear-gradient(90deg, #00c8ff, #00ff88, #ffd300); background-size: 300% 300%; animation: gradientShift 8s ease infinite; }
 @keyframes gradientShift { 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
 
 /* Glow hover */
+.glow { box-shadow: 0 0 15px rgba(0,255,136,0.3); }
 .glow:hover { box-shadow:0 0 20px rgba(0,255,200,0.7),0 0 30px rgba(255,210,0,0.5); transform:scale(1.05); transition:0.4s ease; }
 
 /* Scroll fade animation */
 .fade-up { opacity:0; transform: translateY(30px); transition: all 0.8s ease-out; }
 .fade-up.visible { opacity:1; transform: translateY(0); }
 
-/* Carousel for mobile */
-@media (max-width: 768px) { .desktop-only { display:none; } }
-@media (min-width: 769px) { .mobile-only { display:none; } }
+/* Custom: Force full width for carousel items */
+.carousel-item { width: 100%; }
 
 /* 3D perspective effect */
 .perspective { perspective: 1000px; }
@@ -39,404 +39,481 @@ h1,h2,h3 { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
 /* Hero background overlay */
 .hero-bg { position: absolute; top:0; left:0; width:100%; height:100%; background-size:cover; background-position:center; z-index:-2; }
 .hero-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:-1; }
-  /* Glass & glow effect */
-  .glass {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(15px);
-    border-radius: 1rem;
-    transition: all 0.3s ease;
-  }
-  .glass:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-  .glow {
-    box-shadow: 0 0 15px rgba(0,255,136,0.3);
-  }
+
+/* Hide mobile menu initially */
+.mobile-menu-active { display: flex !important; }
+
+/* Desktop-specific adjustments */
+@media (min-width: 1024px) {
+    /* For Director's Desk, ensures readable content on very tall screens */
+    .directors-desk-content { 
+        max-height: calc(90vh - 150px); /* 90vh minus some padding/header space */
+    }
+}
 
 </style>
 </head>
 <body>
 
-<!-- Hero Section -->
+<div id="mobile-menu" class="hidden fixed inset-0 bg-black bg-opacity-95 z-[100] flex-col items-center justify-center p-6 text-2xl font-bold">
+    <button onclick="toggleMobileMenu()" class="absolute top-4 right-6 text-4xl text-[#00ff88]">×</button>
+    <a href="#about" onclick="toggleMobileMenu()" class="my-4 text-[#00c8ff] hover:text-white transition">About</a>
+    <a href="#services" onclick="toggleMobileMenu()" class="my-4 text-[#00ff88] hover:text-white transition">Services</a>
+    <a href="#projects" onclick="toggleMobileMenu()" class="my-4 text-[#ffd300] hover:text-white transition">Projects</a>
+    <a href="#quality" onclick="toggleMobileMenu()" class="my-4 text-[#00c8ff] hover:text-white transition">Quality</a>
+    <a href="#team" onclick="toggleMobileMenu()" class="my-4 text-[#00ff88] hover:text-white transition">Team</a>
+    <a href="#contact" onclick="toggleMobileMenu()" class="my-4 text-[#ffd300] hover:text-white transition">Contact</a>
+</div>
+
 <header class="relative h-screen flex flex-col items-center justify-center text-center overflow-hidden">
-  <div class="hero-bg" style="background-image:url('https://i.ibb.co/tMBx2jBX/Whats-App-Image-2025-03-27-at-17-15-39-ff1121e9.jpg');"></div>
-  <div class="hero-overlay"></div>
-  <div id="tsparticles" class="absolute inset-0 z-0"></div>
-  <img src="https://i.ibb.co/Wp6mVV1d/logo-Recovered.png" alt="Taurus Civils Logo" class="w-40 mb-6 z-10">
-  <h1 class="text-6xl md:text-7xl font-extrabold neon-gradient text-transparent bg-clip-text z-10">Taurus Civils</h1>
-  <p class="mt-4 text-xl md:text-2xl text-gray-300 z-10">INSANELY ENGINEERED | Building Zimbabwe’s Future</p>
-  <a href="#contact" class="mt-8 px-10 py-4 rounded-full neon-gradient text-black font-bold shadow-xl glow z-10">Contact Us</a>
+  <div class="hero-bg" style="background-image:url('https://i.ibb.co/tMBx2jBX/Whats-App-Image-2025-03-27-at-17-15-39-ff1121e9.jpg');"></div>
+  <div class="hero-overlay"></div>
+  <div id="tsparticles" class="absolute inset-0 z-0"></div>
+  <img src="https://i.ibb.co/Wp6mVV1d/logo-Recovered.png" alt="Taurus Civils Logo" class="w-40 mb-6 z-10">
+  <h1 class="text-6xl md:text-7xl font-extrabold neon-gradient text-transparent bg-clip-text z-10">Taurus Civils</h1>
+  <p class="mt-4 text-xl md:text-2xl text-gray-300 z-10">INSANELY ENGINEERED | Building Zimbabwe’s Future</p>
+  <a href="#contact" class="mt-8 px-10 py-4 rounded-full neon-gradient text-black font-bold shadow-xl glow z-10">Contact Us</a>
 </header>
 
-<!-- Navigation -->
-<nav class="sticky top-0 z-50 bg-[#111]/80 backdrop-blur-lg glass flex justify-center gap-6 py-4">
-  <a href="#about">About</a>
-  <a href="#services">Services</a>
-  <a href="#projects">Projects</a>
-  <a href="#quality">Quality</a>
-  <a href="#team">Team</a>
-  <a href="#vision">Vision</a>
-  <a href="#values">Values</a>
-  <a href="#strategy">Strategy</a>
-  <a href="#training">Training</a>
-  <a href="#accreditation">Accreditation</a>
-  <a href="#contact">Contact</a>
+<nav class="sticky top-0 z-50 bg-[#111]/80 backdrop-blur-lg glass flex justify-between md:justify-center py-4 px-6 md:px-0">
+          <div class="hidden md:flex gap-6 md:container md:mx-auto md:justify-center">
+    <a href="#about" class="hover:text-[#00ff88] transition">About</a>
+    <a href="#services" class="hover:text-[#00ff88] transition">Services</a>
+    <a href="#projects" class="hover:text-[#00ff88] transition">Projects</a>
+    <a href="#quality" class="hover:text-[#00ff88] transition">Quality</a>
+    <a href="#team" class="hover:text-[#00ff88] transition">Team</a>
+    <a href="#vision" class="hover:text-[#00ff88] transition">Vision</a>
+    <a href="#values" class="hover:text-[#00ff88] transition">Values</a>
+    <a href="#strategy" class="hover:text-[#00ff88] transition">Strategy</a>
+    <a href="#contact" class="hover:text-[#00ff88] transition">Contact</a>
+  </div>
+    <button onclick="toggleMobileMenu()" class="md:hidden text-2xl text-[#00ff88] focus:outline-none">☰</button>
+    <a href="#contact" class="md:hidden text-sm px-3 py-1 rounded-full neon-gradient text-black font-bold">Contact</a>
 </nav>
 
-<!-- About Section -->
 <section id="about" class="max-w-6xl mx-auto px-6 py-20 text-center fade-up">
-  <h2 class="text-4xl font-bold text-[#ffd300] mb-8">About Us</h2>
-  <div class="glass p-10">
-    <p class="text-lg leading-relaxed">
-      <strong>Taurus Civils (Pty) Ltd</strong> is a Zimbabwean-owned construction & civil engineering company established in 2015.  
-      Registered with <span class="text-[#00ff88]">CIFOZ</span> & <span class="text-[#00c8ff]">ZBCA</span> in 2019.  
-      We specialize in <span class="text-[#ffd300] font-semibold">building construction, civil works, road infrastructure, stormwater management, and project management</span>.
-    </p>
-  </div>
+  <h2 class="text-4xl font-bold text-[#ffd300] mb-8">About Us</h2>
+  <div class="glass p-10">
+    <p class="text-lg leading-relaxed">
+      <strong>Taurus Civils (Pty) Ltd</strong> is a Zimbabwean-owned construction & civil engineering company established in 2015.  
+      Registered with <span class="text-[#00ff88]">CIFOZ</span> & <span class="text-[#00c8ff]">ZBCA</span> in 2019.  
+      We specialize in <span class="text-[#ffd300] font-semibold">building construction, civil works, road infrastructure, stormwater management, and project management</span>.
+    </p>
+      </div>
 </section>
 
-<!-- From the Contracts Executive’s Desk - Full Page Side-by-Side -->
-<section id="directors-desk" class="fade-up relative h-screen bg-[#0f0f0f] flex items-center">
-  <div class="max-w-7xl mx-auto w-full flex flex-col lg:flex-row px-6 lg:gap-16">
+<section id="directors-desk" class="fade-up relative h-auto lg:min-h-screen bg-[#0f0f0f] flex items-center py-20 lg:py-0">
+      <div class="max-w-7xl mx-auto w-full flex flex-col lg:flex-row px-6 lg:gap-16">
 
-    <!-- Director Photo -->
-    <div class="lg:w-1/3 flex justify-center mb-10 lg:mb-0">
-      <div class="glass p-4 rounded-2xl shadow-lg glow">
-        <img src="https://i.ibb.co/1fjWBbcH/Whats-App-Image-2025-03-27-at-17-15-40-ce953af6.jpg" 
-             alt="Lawrence Mberikwazvo" 
-             class="w-64 h-64 rounded-full object-cover border-4 border-[#00ff88] shadow-xl">
-        <h3 class="text-xl font-semibold text-[#00ff88] mt-4 text-center">Lawrence Mberikwazvo</h3>
-        <p class="text-gray-300 mt-1 text-center">Contracts Director</p>
-      </div>
-    </div>
+        <div class="lg:w-1/3 flex justify-center mb-10 lg:mb-0 lg:py-16">
+      <div class="glass p-4 rounded-2xl shadow-lg glow">
+        <img src="https://i.ibb.co/1fjWBbcH/Whats-App-Image-2025-03-27-at-17-15-40-ce953af6.jpg" 
+             alt="Lawrence Mberikwazvo" 
+             class="w-64 h-64 rounded-full object-cover border-4 border-[#00ff88] shadow-xl">
+        <h3 class="text-xl font-semibold text-[#00ff88] mt-4 text-center">Lawrence Mberikwazvo</h3>
+        <p class="text-gray-300 mt-1 text-center">Contracts Director</p>
+      </div>
+    </div>
 
-    <!-- Letter Content -->
-    <div class="lg:w-2/3 glass p-10 rounded-2xl shadow-lg glow overflow-y-auto max-h-screen">
-      <h2 class="text-4xl font-bold text-[#00ff88] mb-8 text-center lg:text-left">From the Contracts Executive’s Desk</h2>
+            <div class="lg:w-2/3 glass p-10 rounded-2xl shadow-lg glow overflow-y-auto directors-desk-content lg:py-10"> 
+      <h2 class="text-4xl font-bold text-[#00ff88] mb-8 text-center lg:text-left">From the Contracts Executive’s Desk</h2>
 
-      <p class="text-lg leading-relaxed mb-4">
-        <em>“Taurus remains an equal opportunity employer. Our business’ biggest currency as a company is quality: delivering projects on time, within budget, and safely with minimal impact on the environment. Through quality works, we continue to secure repeat business, further harnessing and enhancing our relationships with our partners, giving us greater opportunities to explore new horizons.”</em>
-      </p>
-      <p class="text-right font-semibold text-[#00ff88] mb-6">— Lawrence Mberikwazvo</p>
+      <p class="text-lg leading-relaxed mb-4">
+        <em>“Taurus remains an equal opportunity employer. Our business’ biggest currency as a company is quality: delivering projects on time, within budget, and safely with minimal impact on the environment. Through quality works, we continue to secure repeat business, further harnessing and enhancing our relationships with our partners, giving us greater opportunities to explore new horizons.”</em>
+      </p>
+      <p class="text-right font-semibold text-[#00ff88] mb-6">— Lawrence Mberikwazvo</p>
 
-      <p class="text-lg leading-relaxed mb-4">
-        Taurus Civils is a building and infrastructure construction company specializing in heavy duty concrete works, brickworks, and wet-trades. Registered in 2019, the company was already active in the construction space prior to registration. Our genuine desire is to contribute positively to the development of the construction industry. Currently, the company employs 65 people directly and 27 through various specialized trade sub-contractors.
-      </p>
+      <p class="text-lg leading-relaxed mb-4">
+        Taurus Civils is a building and infrastructure construction company specializing in heavy duty concrete works, brickworks, and wet-trades. Registered in 2019, the company was already active in the construction space prior to registration. Our genuine desire is to contribute positively to the development of the construction industry. Currently, the company employs 65 people directly and 27 through various specialized trade sub-contractors.
+      </p>
 
-      <p class="text-lg leading-relaxed mb-4">
-        “As Taurus, we continuously strive to be the best in what we do and therefore deliberately seek new and better ways of delivering a quality product to our clients on time, without compromise. We aim to become a hub of thought-leaders whose voice must be heard in the infrastructure space within Zimbabwe. This realization has driven our sourcing of highly skilled and experienced individuals, strategic relationships with key players in the industry, and our resolve to make research and development part of our continuous learning culture going forward.”
-      </p>
+      <p class="text-lg leading-relaxed mb-4">
+        “As Taurus, we continuously strive to be the best in what we do and therefore deliberately seek new and better ways of delivering a quality product to our clients on time, without compromise. We aim to become a hub of thought-leaders whose voice must be heard in the infrastructure space within Zimbabwe. This realization has driven our sourcing of highly skilled and experienced individuals, strategic relationships with key players in the industry, and our resolve to make research and development part of our continuous learning culture going forward.”
+      </p>
 
-      <p class="text-lg font-semibold mb-2">Our core focus within the infrastructure and construction value chain:</p>
-      <ul class="list-disc list-inside text-lg space-y-1 mb-4">
-        <li>Building and masonry works</li>
-        <li>Civil Construction</li>
-        <li>Roads and bulk earthworks</li>
-        <li>Major storm water management</li>
-        <li>Water reservoirs, wastewater treatment plants, and heavy concrete works</li>
-        <li>Bridges and other related structures</li>
-      </ul>
+      <p class="text-lg font-semibold mb-2">Our core focus within the infrastructure and construction value chain:</p>
+      <ul class="list-disc list-inside text-lg space-y-1 mb-4">
+        <li>Building and masonry works</li>
+        <li>Civil Construction</li>
+        <li>Roads and bulk earthworks</li>
+        <li>Major storm water management</li>
+        <li>Water reservoirs, wastewater treatment plants, and heavy concrete works</li>
+        <li>Bridges and other related structures</li>
+      </ul>
 
-      <p class="text-lg leading-relaxed mb-4">
-        “The quality of our works in the first phase of the Beitbridge Border project enabled us to secure repeat works in Zimbabwe. This project is extremely important as it improves ease of access into and out of Zimbabwe and beyond, driving economic activity that reduces unemployment and contributes positively to socio-economic development.
-      </p>
+      <p class="text-lg leading-relaxed mb-4">
+        “The quality of our works in the first phase of the Beitbridge Border project enabled us to secure repeat works in Zimbabwe. This project is extremely important as it improves ease of access into and out of Zimbabwe and beyond, driving economic activity that reduces unemployment and contributes positively to socio-economic development.
+      </p>
 
-      <p class="text-lg leading-relaxed">
-        The beauty of our industry is that we create legacy, monuments, and landmarks that will be there for generations to see and benefit from. We believe such capital projects are part of our autobiographical footprint that we will always be proud of.”
-      </p>
-    </div>
+      <p class="text-lg leading-relaxed">
+        The beauty of our industry is that we create legacy, monuments, and landmarks that will be there for generations to see and benefit from. We believe such capital projects are part of our autobiographical footprint that we will always be proud of.”
+      </p>
+    </div>
 
-  </div>
+  </div>
 </section>
 
 
-<!-- Services Section -->
 <section id="services" class="py-20 fade-up">
-  <div class="max-w-6xl mx-auto px-6 text-center">
-    <h2 class="text-4xl font-bold neon-gradient text-transparent bg-clip-text mb-10">Our Services</h2>
-    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      <div class="glass p-6 shadow-lg glow">
-        <h3 class="font-semibold text-lg mb-2">Building Construction & Masonry Works</h3>
-        <p>High-quality residential & commercial buildings.</p>
-      </div>
-      <div class="glass p-6 shadow-lg glow">
-        <h3 class="font-semibold text-lg mb-2">Roads, Earthworks & Storm Water</h3>
-        <p>Efficient infrastructure & drainage systems.</p>
-      </div>
-      <div class="glass p-6 shadow-lg glow">
-        <h3 class="font-semibold text-lg mb-2">Reticulation & Bulk Pipelines</h3>
-        <p>Water and sewage pipeline management solutions.</p>
-      </div>
-    </div>
-  </div>
+  <div class="max-w-6xl mx-auto px-6 text-center">
+    <h2 class="text-4xl font-bold neon-gradient text-transparent bg-clip-text mb-10">Our Services</h2>
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="glass p-6 shadow-lg glow">
+        <h3 class="font-semibold text-lg mb-2">Building Construction & Masonry Works</h3>
+        <p>High-quality residential & commercial buildings.</p>
+        <p class="text-xs text-gray-500 mt-2">Residential & Commercial</p>
+      </div>
+      <div class="glass p-6 shadow-lg glow">
+        <h3 class="font-semibold text-lg mb-2">Roads, Earthworks & Storm Water</h3>
+        <p>Efficient infrastructure & drainage systems.</p>
+        <p class="text-xs text-gray-500 mt-2">Interchanges & Municipal Works</p>
+      </div>
+      <div class="glass p-6 shadow-lg glow">
+        <h3 class="font-semibold text-lg mb-2">Reticulation & Bulk Pipelines</h3>
+        <p>Water and sewage pipeline management solutions.</p>
+        <p class="text-xs text-gray-500 mt-2">Heavy Concrete Works</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- Projects Section -->
 <section id="projects" class="py-20 fade-up">
-  <div class="max-w-7xl mx-auto px-6">
-    <h2 class="text-4xl font-bold text-[#00ff88] mb-12 text-center">Key Projects</h2>
-    <div class="grid gap-6 sm:grid-cols-2 md:grid-cols-3 desktop-only">
-      <!-- Project Tiles -->
-      <div class="group perspective">
-        <div class="glass overflow-hidden shadow-lg glow transform transition duration-500 group-hover:rotate-y-6 group-hover:scale-105 relative">
-          <img src="https://i.ibb.co/FbxsYryV/Whats-App-Image-2025-03-27-at-17-15-38-a85369fe.jpg" class="w-full h-60 object-cover">
-          <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-            <h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Mbudzi Interchange</h3>
-          </div>
-        </div>
-      </div>
-      <div class="group perspective">
-        <div class="glass overflow-hidden shadow-lg glow transform transition duration-500 group-hover:rotate-y-6 group-hover:scale-105 relative">
-          <img src="https://i.ibb.co/d4YWVCqL/Whats-App-Image-2025-03-27-at-17-15-39-a6fd182e.jpg" class="w-full h-60 object-cover">
-          <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-            <h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Beitbridge Border</h3>
-          </div>
-        </div>
-      </div>
-      <div class="group perspective">
-        <div class="glass overflow-hidden shadow-lg glow transform transition duration-500 group-hover:rotate-y-6 group-hover:scale-105 relative">
-          <img src="https://i.ibb.co/tMBx2jBX/Whats-App-Image-2025-03-27-at-17-15-39-ff1121e9.jpg" class="w-full h-60 object-cover">
-          <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-            <h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Ngezi Mine Housing</h3>
-          </div>
-        </div>
-      </div>
-      <div class="group perspective">
-        <div class="glass overflow-hidden shadow-lg glow transform transition duration-500 group-hover:rotate-y-6 group-hover:scale-105 relative">
-          <img src="https://i.ibb.co/1fjWBbcH/Whats-App-Image-2025-03-27-at-17-15-40-ce953af6.jpg" class="w-full h-60 object-cover">
-          <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-            <h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Stormwater Drains</h3>
-          </div>
-        </div>
-      </div>
-      <div class="group perspective">
-        <div class="glass overflow-hidden shadow-lg glow transform transition duration-500 group-hover:rotate-y-6 group-hover:scale-105 relative">
-          <img src="https://i.ibb.co/DD8tv1Gn/Whats-App-Image-2025-03-27-at-17-15-41-2f79f720.jpg" class="w-full h-60 object-cover">
-          <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-            <h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Culverts & Reticulation</h3>
-          </div>
-        </div>
-      </div>
-      <div class="group perspective">
-        <div class="glass overflow-hidden shadow-lg glow transform transition duration-500 group-hover:rotate-y-6 group-hover:scale-105 relative">
-          <img src="https://i.ibb.co/nN0zZDHW/Whats-App-Image-2025-03-27-at-17-15-46-60f7afa7.jpg" class="w-full h-60 object-cover">
-          <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-            <h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Bridge Works</h3>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-4xl font-bold text-[#00ff88] mb-12 text-center">Key Projects</h2>
 
-    <!-- Mobile Carousel -->
-    <div class="mobile-only relative w-full overflow-hidden mt-6">
-      <div class="flex transition-transform duration-500" id="carousel">
-        <img src="https://i.ibb.co/FbxsYryV/Whats-App-Image-2025-03-27-at-17-15-38-a85369fe.jpg" class="w-full h-64 object-cover flex-shrink-0">
-        <img src="https://i.ibb.co/d4YWVCqL/Whats-App-Image-2025-03-27-at-17-15-39-a6fd182e.jpg" class="w-full h-64 object-cover flex-shrink-0">
-        <img src="https://i.ibb.co/tMBx2jBX/Whats-App-Image-2025-03-27-at-17-15-39-ff1121e9.jpg" class="w-full h-64 object-cover flex-shrink-0">
-      </div>
-    </div>
-  </div>
+        <div class="hidden md:grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div class="group perspective">
+        <div class="glass overflow-hidden shadow-lg glow transform transition duration-500 group-hover:rotate-y-6 group-hover:scale-105 relative">
+          <img src="https://i.ibb.co/FbxsYryV/Whats-App-Image-2025-03-27-at-17-15-38-a85369fe.jpg" class="w-full h-60 object-cover">
+          <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+            <h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Mbudzi Interchange</h3>
+          </div>
+        </div>
+      </div>
+      <div class="group perspective">
+        <div class="glass overflow-hidden shadow-lg glow transform transition duration-500 group-hover:rotate-y-6 group-hover:scale-105 relative">
+          <img src="https://i.ibb.co/d4YWVCqL/Whats-App-Image-2025-03-27-at-17-15-39-a6fd182e.jpg" class="w-full h-60 object-cover">
+          <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+            <h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Beitbridge Border</h3>
+          </div>
+        </div>
+      </div>
+      <div class="group perspective">
+        <div class="glass overflow-hidden shadow-lg glow transform transition duration-500 group-hover:rotate-y-6 group-hover:scale-105 relative">
+          <img src="https://i.ibb.co/tMBx2jBX/Whats-App-Image-2025-03-27-at-17-15-39-ff1121e9.jpg" class="w-full h-60 object-cover">
+          <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+            <h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Ngezi Mine Housing</h3>
+          </div>
+        </div>
+      </div>
+      <div class="group perspective">
+        <div class="glass overflow-hidden shadow-lg glow transform transition duration-500 group-hover:rotate-y-6 group-hover:scale-105 relative">
+          <img src="https://i.ibb.co/1fjWBbcH/Whats-App-Image-2025-03-27-at-17-15-40-ce953af6.jpg" class="w-full h-60 object-cover">
+          <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+            <h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Stormwater Drains</h3>
+          </div>
+        </div>
+      </div>
+      <div class="group perspective">
+        <div class="glass overflow-hidden shadow-lg glow transform transition duration-500 group-hover:rotate-y-6 group-hover:scale-105 relative">
+          <img src="https://i.ibb.co/DD8tv1Gn/Whats-App-Image-2025-03-27-at-17-15-41-2f79f720.jpg" class="w-full h-60 object-cover">
+          <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+            <h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Culverts & Reticulation</h3>
+          </div>
+        </div>
+        </div>
+      <div class="group perspective">
+        <div class="glass overflow-hidden shadow-lg glow transform transition duration-500 group-hover:rotate-y-6 group-hover:scale-105 relative">
+          <img src="https://i.ibb.co/nN0zZDHW/Whats-App-Image-2025-03-27-at-17-15-46-60f7afa7.jpg" class="w-full h-60 object-cover">
+          <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+            <h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Bridge Works</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+        <div class="md:hidden relative w-full overflow-hidden mt-6">
+              <div class="flex transition-transform duration-500 ease-in-out" id="mobile-carousel">
+        <div class="carousel-item flex-shrink-0 relative">
+            <img src="https://i.ibb.co/FbxsYryV/Whats-App-Image-2025-03-27-at-17-15-38-a85369fe.jpg" class="w-full h-64 object-cover">
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center"><h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Mbudzi Interchange</h3></div>
+        </div>
+        <div class="carousel-item flex-shrink-0 relative">
+            <img src="https://i.ibb.co/d4YWVCqL/Whats-App-Image-2025-03-27-at-17-15-39-a6fd182e.jpg" class="w-full h-64 object-cover">
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center"><h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Beitbridge Border</h3></div>
+        </div>
+        <div class="carousel-item flex-shrink-0 relative">
+            <img src="https://i.ibb.co/tMBx2jBX/Whats-App-Image-2025-03-27-at-17-15-39-ff1121e9.jpg" class="w-full h-64 object-cover">
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center"><h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Ngezi Mine Housing</h3></div>
+        </div>
+        <div class="carousel-item flex-shrink-0 relative">
+            <img src="https://i.ibb.co/1fjWBbcH/Whats-App-Image-2025-03-27-at-17-15-40-ce953af6.jpg" class="w-full h-64 object-cover">
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center"><h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Stormwater Drains</h3></div>
+        </div>
+        <div class="carousel-item flex-shrink-0 relative">
+            <img src="https://i.ibb.co/DD8tv1Gn/Whats-App-Image-2025-03-27-at-17-15-41-2f79f720.jpg" class="w-full h-64 object-cover">
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center"><h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Culverts & Reticulation</h3></div>
+        </div>
+        <div class="carousel-item flex-shrink-0 relative">
+            <img src="https://i.ibb.co/nN0zZDHW/Whats-App-Image-2025-03-27-at-17-15-46-60f7afa7.jpg" class="w-full h-64 object-cover">
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center"><h3 class="text-xl font-bold text-[#00ff88] neon-gradient text-transparent bg-clip-text">Bridge Works</h3></div>
+        </div>
+      </div>
+        <div id="carousel-dots" class="flex justify-center space-x-2 mt-4"></div>
+    </div>
+  </div>
 </section>
 
-<!-- Quality Section -->
 <section id="quality" class="py-20 fade-up text-center">
-  <h2 class="text-4xl font-bold neon-gradient text-transparent bg-clip-text mb-6">Quality Policy & Objectives</h2>
-  <p class="max-w-3xl mx-auto text-lg text-gray-300 leading-relaxed">
-    We are committed to <span class="text-[#00c8ff] font-semibold">client satisfaction, safety, compliance, and sustainability</span>.  
-    Objectives include maintaining client satisfaction above 85%, training 100% of staff in quality principles, reducing rework to below 5%, and integrating sustainability assessments into all new projects.
-  </p>
+  <h2 class="text-4xl font-bold neon-gradient text-transparent bg-clip-text mb-6">Quality Policy & Objectives</h2>
+  <p class="max-w-3xl mx-auto text-lg text-gray-300 leading-relaxed">
+    We are committed to <span class="text-[#00c8ff] font-semibold">client satisfaction, safety, compliance, and sustainability</span>.  
+    Objectives include maintaining client satisfaction above 85%, training 100% of staff in quality principles, reducing rework to below 5%, and integrating sustainability assessments into all new projects.
+  </p>
 </section>
 
-<!-- Team Section -->
 <section id="team" class="py-20 fade-up bg-[#0f0f0f]">
-  <h2 class="text-4xl font-bold text-[#00ff88] mb-10 text-center">Our Leadership</h2>
-  <div class="max-w-6xl mx-auto grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+  <h2 class="text-4xl font-bold text-[#00ff88] mb-10 text-center">Our Leadership</h2>
+      <div class="max-w-6xl mx-auto grid gap-10 sm:grid-cols-2 md:grid-cols-3 px-6 justify-center"> 
 
-    <!-- Director 1 -->
-    <div class="glass p-6 shadow-lg glow flex flex-col items-center text-center rounded-2xl transition transform hover:scale-105">
-      <img src="https://i.ibb.co/1fjWBbcH/Whats-App-Image-2025-03-27-at-17-15-40-ce953af6.jpg" alt="Lawrence Mberikwazvo" class="w-32 h-32 rounded-full object-cover mb-4 border-4 border-[#00ff88] shadow-md">
-      <h3 class="text-xl font-semibold text-[#00ff88]">Lawrence Mberikwazvo</h3>
-      <p class="text-gray-300 mt-2">Contracts Director, 20+ years in African projects</p>
-    </div>
+        <div class="glass p-6 shadow-lg glow flex flex-col items-center text-center rounded-2xl transition transform hover:scale-105">
+      <img src="https://i.ibb.co/1fjWBbcH/Whats-App-Image-2025-03-27-at-17-15-40-ce953af6.jpg" alt="Lawrence Mberikwazvo" class="w-32 h-32 rounded-full object-cover mb-4 border-4 border-[#00ff88] shadow-md">
+      <h3 class="text-xl font-semibold text-[#00ff88]">Lawrence Mberikwazvo</h3>
+      <p class="text-gray-300 mt-2">Contracts Director, 20+ years in African projects</p>
+    </div>
 
-    <!-- Director 2 -->
-    <div class="glass p-6 shadow-lg glow flex flex-col items-center text-center rounded-2xl transition transform hover:scale-105">
-      <img src="https://i.ibb.co/tMBx2jBX/Whats-App-Image-2025-03-27-at-17-15-39-ff1121e9.jpg" alt="Lyster Zinyemba" class="w-32 h-32 rounded-full object-cover mb-4 border-4 border-[#00ff88] shadow-md">
-      <h3 class="text-xl font-semibold text-[#00ff88]">Lyster Zinyemba</h3>
-      <p class="text-gray-300 mt-2">Finance Director, BSc Finance & property experience</p>
-    </div>
+        <div class="glass p-6 shadow-lg glow flex flex-col items-center text-center rounded-2xl transition transform hover:scale-105">
+      <img src="https://i.ibb.co/d4YWVCqL/Whats-App-Image-2025-03-27-at-17-15-39-a6fd182e.jpg" alt="Lyster Zinyemba" class="w-32 h-32 rounded-full object-cover mb-4 border-4 border-[#00ff88] shadow-md">
+      <h3 class="text-xl font-semibold text-[#00ff88]">Lyster Zinyemba</h3>
+      <p class="text-gray-300 mt-2">Finance Director, BSc Finance & property experience</p>
+    </div>
 
-    <!-- Director 3 -->
-    <div class="glass p-6 shadow-lg glow flex flex-col items-center text-center rounded-2xl transition transform hover:scale-105">
-      <img src="https://i.ibb.co/tMBx2jBX/Whats-App-Image-2025-03-27-at-17-15-39-ff1121e9.jpg" alt="Eng. Tendai Chikwata" class="w-32 h-32 rounded-full object-cover mb-4 border-4 border-[#00ff88] shadow-md">
-      <h3 class="text-xl font-semibold text-[#00ff88]">Eng. Tendai Chikwata</h3>
-      <p class="text-gray-300 mt-2">Managing Director, BSc Civil Engineering & MBA</p>
-    </div>
+        <div class="glass p-6 shadow-lg glow flex flex-col items-center text-center rounded-2xl transition transform hover:scale-105">
+      <img src="https://i.ibb.co/tMBx2jBX/Whats-App-Image-2025-03-27-at-17-15-39-ff1121e9.jpg" alt="Eng. Tendai Chikwata" class="w-32 h-32 rounded-full object-cover mb-4 border-4 border-[#00ff88] shadow-md">
+      <h3 class="text-xl font-semibold text-[#00ff88]">Eng. Tendai Chikwata</h3>
+      <p class="text-gray-300 mt-2">Managing Director, BSc Civil Engineering & MBA</p>
+    </div>
 
-  </div>
+  </div>
 </section>
 
-<!-- Vision Section -->
 <section id="vision" class="py-20 fade-up text-center">
-  <h2 class="text-4xl font-bold neon-gradient text-transparent bg-clip-text mb-8">Vision & Mission</h2>
-  <div class="max-w-4xl mx-auto glass p-10">
-    <p class="text-lg mb-4">
-      <strong>Vision:</strong> To be Zimbabwe’s leading civil engineering and construction company, delivering sustainable, high-quality projects that empower communities.
-    </p>
-    <p class="text-lg">
-      <strong>Mission:</strong> To provide innovative, cost-effective construction solutions while maintaining the highest standards of safety, quality, and sustainability.
-    </p>
-  </div>
+  <h2 class="text-4xl font-bold neon-gradient text-transparent bg-clip-text mb-8">Vision & Mission</h2>
+  <div class="max-w-4xl mx-auto glass p-10 px-6">
+    <p class="text-lg mb-4">
+      <strong>Vision:</strong> To be Zimbabwe’s leading civil engineering and construction company, delivering sustainable, high-quality projects that empower communities.
+    </p>
+    <p class="text-lg">
+      <strong>Mission:</strong> To provide innovative, cost-effective construction solutions while maintaining the highest standards of safety, quality, and sustainability.
+    </p>
+  </div>
 </section>
 
-<!-- Values Section -->
 <section id="values" class="py-20 fade-up text-center bg-[#111]">
-  <h2 class="text-4xl font-bold text-[#ffd300] mb-8">Our Values</h2>
-  <div class="max-w-6xl mx-auto grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-    <div class="glass p-6 shadow-lg glow">Integrity</div>
-    <div class="glass p-6 shadow-lg glow">Quality</div>
-    <div class="glass p-6 shadow-lg glow">Innovation</div>
-    <div class="glass p-6 shadow-lg glow">Sustainability</div>
-    <div class="glass p-6 shadow-lg glow">Client Focus</div>
-    <div class="glass p-6 shadow-lg glow">Safety</div>
-    <div class="glass p-6 shadow-lg glow">Teamwork</div>
-    <div class="glass p-6 shadow-lg glow">Accountability</div>
-  </div>
+  <h2 class="text-4xl font-bold text-[#ffd300] mb-8">Our Values</h2>
+      <div class="max-w-6xl mx-auto grid gap-6 grid-cols-2 md:grid-cols-4 px-6 justify-center">
+    <div class="glass p-6 shadow-lg glow">Integrity</div>
+    <div class="glass p-6 shadow-lg glow">Quality</div>
+    <div class="glass p-6 shadow-lg glow">Innovation</div>
+    <div class="glass p-6 shadow-lg glow">Sustainability</div>
+    <div class="glass p-6 shadow-lg glow">Client Focus</div>
+    <div class="glass p-6 shadow-lg glow">Safety</div>
+    <div class="glass p-6 shadow-lg glow">Teamwork</div>
+    <div class="glass p-6 shadow-lg glow">Accountability</div>
+  </div>
 </section>
 
-<!-- Strategy Section -->
 <section id="strategy" class="py-20 fade-up text-center">
-  <h2 class="text-4xl font-bold neon-gradient text-transparent bg-clip-text mb-8">Business Goals & Strategy</h2>
-  <div class="max-w-5xl mx-auto glass p-10 text-left">
-    <ul class="list-disc pl-6 space-y-2 text-lg">
-      <li>Expand our operations to cover all major urban and industrial projects in Zimbabwe by 2030.</li>
-      <li>Maintain client satisfaction above 85% on all projects.</li>
-      <li>Invest in staff training & development to achieve 100% certified personnel in key competencies.</li>
-      <li>Reduce project rework to below 5% through strict quality control measures.</li>
-      <li>Integrate sustainable construction practices in all new developments.</li>
-    </ul>
-  </div>
+  <h2 class="text-4xl font-bold neon-gradient text-transparent bg-clip-text mb-8">Business Goals & Strategy</h2>
+  <div class="max-w-5xl mx-auto glass p-10 text-left px-6">
+    <ul class="list-disc pl-6 space-y-2 text-lg">
+      <li>Expand our operations to cover all major urban and industrial projects in Zimbabwe by 2030.</li>
+      <li>Maintain client satisfaction above 85% on all projects.</li>
+      <li>Invest in staff training & development to achieve 100% certified personnel in key competencies.</li>
+      <li>Reduce project rework to below 5% through strict quality control measures.</li>
+      <li>Integrate sustainable construction practices in all new developments.</li>
+    </ul>
+  </div>
 </section>
 
-<!-- Training Section -->
 <section id="training" class="py-20 fade-up text-center bg-[#111]">
-  <h2 class="text-4xl font-bold text-[#00ff88] mb-8">Training & Certification</h2>
-  <div class="max-w-6xl mx-auto grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-    <div class="glass p-6 shadow-lg glow">
-      <h3 class="font-semibold mb-2">CIFOZ Registration</h3>
-      <p>Construction Industry Federation of Zimbabwe, Registered 2019</p>
-    </div>
-    <div class="glass p-6 shadow-lg glow">
-      <h3 class="font-semibold mb-2">ZBCA Accreditation</h3>
-      <p>Zimbabwe Building Contractors Association, Registered 2019</p>
-    </div>
-    <div class="glass p-6 shadow-lg glow">
-      <h3 class="font-semibold mb-2">Staff Training Programs</h3>
-      <p>100% staff trained in Quality, Safety, and Project Management standards</p>
-    </div>
-  </div>
+  <h2 class="text-4xl font-bold text-[#00ff88] mb-8">Training & Certification</h2>
+      <div class="max-w-6xl mx-auto grid gap-6 sm:grid-cols-2 lg:grid-cols-3 px-6 justify-center">
+    <div class="glass p-6 shadow-lg glow">
+      <h3 class="font-semibold mb-2">CIFOZ Registration</h3>
+      <p>Construction Industry Federation of Zimbabwe, Registered 2019</p>
+    </div>
+    <div class="glass p-6 shadow-lg glow">
+      <h3 class="font-semibold mb-2">ZBCA Accreditation</h3>
+      <p>Zimbabwe Building Contractors Association, Registered 2019</p>
+    </div>
+    <div class="glass p-6 shadow-lg glow">
+      <h3 class="font-semibold mb-2">Staff Training Programs</h3>
+      <p>100% staff trained in Quality, Safety, and Project Management standards</p>
+    </div>
+  </div>
 </section>
 
-<!-- Projects Table Section -->
 <section id="projects-table" class="py-20 fade-up text-center">
-  <h2 class="text-4xl font-bold neon-gradient text-transparent bg-clip-text mb-10">Completed Projects</h2>
-  <div class="overflow-x-auto max-w-6xl mx-auto">
-    <table class="min-w-full table-auto border-collapse border border-gray-700">
-      <thead>
-        <tr class="bg-[#111]">
-          <th class="border border-gray-600 px-4 py-2">Project</th>
-          <th class="border border-gray-600 px-4 py-2">Location</th>
-          <th class="border border-gray-600 px-4 py-2">Scope</th>
-          <th class="border border-gray-600 px-4 py-2">Completion</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="hover:bg-[#222]">
-          <td class="border border-gray-600 px-4 py-2">Mbudzi Interchange</td>
-          <td class="border border-gray-600 px-4 py-2">Harare</td>
-          <td class="border border-gray-600 px-4 py-2">Drainage, Culverts, Road Lining</td>
-          <td class="border border-gray-600 px-4 py-2">2025</td>
-        </tr>
-        <tr class="hover:bg-[#222]">
-          <td class="border border-gray-600 px-4 py-2">Beitbridge Border</td>
-          <td class="border border-gray-600 px-4 py-2">Beitbridge</td>
-          <td class="border border-gray-600 px-4 py-2">Pavement & Reticulation</td>
-          <td class="border border-gray-600 px-4 py-2">2024</td>
-        </tr>
-        <tr class="hover:bg-[#222]">
-          <td class="border border-gray-600 px-4 py-2">Ngezi Mine Housing</td>
-          <td class="border border-gray-600 px-4 py-2">Ngezi</td>
-          <td class="border border-gray-600 px-4 py-2">Residential Buildings & Roads</td>
-          <td class="border border-gray-600 px-4 py-2">2023</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <h2 class="text-4xl font-bold neon-gradient text-transparent bg-clip-text mb-10">Completed Projects</h2>
+  <div class="overflow-x-auto max-w-6xl mx-auto px-6">
+    <table class="min-w-full table-auto border-collapse border border-gray-700">
+      <thead>
+        <tr class="bg-[#111]">
+          <th class="border border-gray-600 px-4 py-2 text-left">Project</th>
+          <th class="border border-gray-600 px-4 py-2 text-left">Location</th>
+          <th class="border border-gray-600 px-4 py-2 text-left">Scope</th>
+          <th class="border border-gray-600 px-4 py-2">Completion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="hover:bg-[#222]">
+          <td class="border border-gray-600 px-4 py-2 text-left">Mbudzi Interchange</td>
+          <td class="border border-gray-600 px-4 py-2 text-left">Harare</td>
+          <td class="border border-gray-600 px-4 py-2 text-left">Drainage, Culverts, Road Lining</td>
+          <td class="border border-gray-600 px-4 py-2">2025</td>
+        </tr>
+        <tr class="hover:bg-[#222]">
+          <td class="border border-gray-600 px-4 py-2 text-left">Beitbridge Border</td>
+          <td class="border border-gray-600 px-4 py-2 text-left">Beitbridge</td>
+          <td class="border border-gray-600 px-4 py-2 text-left">Pavement & Reticulation</td>
+          <td class="border border-gray-600 px-4 py-2">2024</td>
+        </tr>
+        <tr class="hover:bg-[#222]">
+          <td class="border border-gray-600 px-4 py-2 text-left">Ngezi Mine Housing</td>
+          <td class="border border-gray-600 px-4 py-2 text-left">Ngezi</td>
+          <td class="border border-gray-600 px-4 py-2 text-left">Residential Buildings & Roads</td>
+          <td class="border border-gray-600 px-4 py-2">2023</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </section>
 
-<!-- Accreditation Section -->
 <section id="accreditation" class="py-20 fade-up text-center bg-[#111]">
-  <h2 class="text-4xl font-bold text-[#ffd300] mb-8">Accreditation</h2>
-  <div class="max-w-4xl mx-auto grid gap-6 sm:grid-cols-2">
-    <div class="glass p-6 shadow-lg glow">CIFOZ Registered Contractor</div>
-    <div class="glass p-6 shadow-lg glow">ZBCA Accredited</div>
-  </div>
+  <h2 class="text-4xl font-bold text-[#ffd300] mb-8">Accreditation</h2>
+  <div class="max-w-4xl mx-auto grid gap-6 sm:grid-cols-2 px-6 justify-center">
+    <div class="glass p-6 shadow-lg glow">CIFOZ Registered Contractor</div>
+    <div class="glass p-6 shadow-lg glow">ZBCA Accredited</div>
+  </div>
 </section>
 
-<!-- Contact Section -->
 <section id="contact" class="py-20 fade-up text-center">
-  <h2 class="text-4xl font-bold neon-gradient text-transparent bg-clip-text mb-10">Contact Us</h2>
-  <div class="max-w-4xl mx-auto grid gap-6 sm:grid-cols-2">
-    <div class="glass p-6 shadow-lg glow text-left">
-      <p><strong>Phone:</strong> +263 77 332 5851 </p>
-      <p><strong>Email:</strong> info@tauruscivils.co.zw</p>
-      <p><strong>Address:</strong> 28B Mountbatten Drive Marlborough  , Harare, Zimbabwe</p>
-    </div>
-    <div class="glass p-6 shadow-lg glow">
-      <form class="flex flex-col gap-4">
-        <input type="text" placeholder="Name" class="p-3 rounded bg-[#111] text-white border border-gray-600">
-        <input type="email" placeholder="Email" class="p-3 rounded bg-[#111] text-white border border-gray-600">
-        <textarea placeholder="Message" class="p-3 rounded bg-[#111] text-white border border-gray-600"></textarea>
-        <button type="submit" class="px-6 py-3 neon-gradient text-black font-bold rounded glow">Send</button>
-      </form>
-    </div>
-  </div>
+  <h2 class="text-4xl font-bold neon-gradient text-transparent bg-clip-text mb-10">Contact Us</h2>
+  <div class="max-w-4xl mx-auto grid gap-6 sm:grid-cols-2 px-6">
+    <div class="glass p-6 shadow-lg glow text-left">
+      <p><strong>Phone:</strong> +263 77 332 5851 </p>
+      <p><strong>Email:</strong> info@tauruscivils.co.zw</p>
+      <p><strong>Address:</strong> 28B Mountbatten Drive Marlborough  , Harare, Zimbabwe</p>
+    </div>
+    <div class="glass p-6 shadow-lg glow">
+      <form class="flex flex-col gap-4">
+        <input type="text" placeholder="Name" class="p-3 rounded bg-[#111] text-white border border-gray-600">
+        <input type="email" placeholder="Email" class="p-3 rounded bg-[#111] text-white border border-gray-600">
+        <textarea placeholder="Message" class="p-3 rounded bg-[#111] text-white border border-gray-600"></textarea>
+        <button type="submit" class="px-6 py-3 neon-gradient text-black font-bold rounded glow">Send</button>
+      </form>
+    </div>
+  </div>
 </section>
 
-<!-- Footer -->
 <footer class="py-8 text-center text-gray-400 bg-[#111]">
-  &copy; 2025 Taurus Civils. All Rights Reserved.
+  &copy; 2025 Taurus Civils. All Rights Reserved.
 </footer>
 
-<!-- Scroll animations -->
 <script>
+// --- Scroll Animations (Original) ---
 const faders = document.querySelectorAll('.fade-up');
 const appearOptions = { threshold: 0.3, rootMargin: "0px 0px -50px 0px" };
 const appearOnScroll = new IntersectionObserver((entries, observer) => {
-  entries.forEach(entry => {
-    if(!entry.isIntersecting) return;
-    entry.target.classList.add('visible');
-    observer.unobserve(entry.target);
-  });
+  entries.forEach(entry => {
+    if(!entry.isIntersecting) return;
+    entry.target.classList.add('visible');
+    observer.unobserve(entry.target);
+  });
 }, appearOptions);
 faders.forEach(fader => appearOnScroll.observe(fader));
 
-// tsparticles init
+// --- Mobile Navigation Functionality ---
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    menu.classList.toggle('hidden');
+    menu.classList.toggle('mobile-menu-active'); // To override default display
+    document.body.classList.toggle('overflow-hidden'); // Prevent scroll when menu is open
+}
+
+// --- Mobile Carousel Functionality (New) ---
+const carousel = document.getElementById('mobile-carousel');
+const items = carousel ? carousel.querySelectorAll('.carousel-item') : [];
+const dotsContainer = document.getElementById('carousel-dots');
+let currentIndex = 0;
+const totalItems = items.length;
+
+if (carousel && totalItems > 0) {
+    // 1. Create Dots
+    for (let i = 0; i < totalItems; i++) {
+        const dot = document.createElement('span');
+        dot.classList.add('w-3', 'h-3', 'rounded-full', 'bg-gray-700', 'cursor-pointer', 'transition');
+        dot.setAttribute('data-index', i);
+        dot.onclick = () => goToSlide(i);
+        dotsContainer.appendChild(dot);
+    }
+
+    const updateCarousel = () => {
+        // Slide the carousel
+        const offset = -currentIndex * 100;
+        carousel.style.transform = `translateX(${offset}%)`;
+
+        // Update dots
+        dotsContainer.querySelectorAll('span').forEach((dot, index) => {
+            if (index === currentIndex) {
+                dot.classList.remove('bg-gray-700');
+                dot.classList.add('bg-[#00ff88]', 'glow');
+            } else {
+                dot.classList.add('bg-gray-700');
+                dot.classList.remove('bg-[#00ff88]', 'glow');
+            }
+        });
+    };
+
+    const goToSlide = (index) => {
+        currentIndex = index;
+        updateCarousel();
+    };
+
+    // Auto-slide functionality
+    const startAutoSlide = () => {
+        return setInterval(() => {
+            currentIndex = (currentIndex + 1) % totalItems;
+            updateCarousel();
+        }, 5000); // Change slide every 5 seconds
+    };
+
+    // Start carousel and initial update
+    let slideInterval = startAutoSlide();
+    updateCarousel(); 
+
+    // Optional: Pause on hover/touch for a better user experience
+    carousel.addEventListener('mouseenter', () => clearInterval(slideInterval));
+    carousel.addEventListener('mouseleave', () => slideInterval = startAutoSlide());
+}
+
+// --- TS Particles (Original) ---
 tsParticles.load("tsparticles", {
-  fpsLimit: 60,
-  particles: {
-    number: { value: 50, density: { enable: true, area: 800 } },
-    color: { value: "#00ff88" },
-    shape: { type: "circle" },
-    opacity: { value: 0.6 },
-    size: { value: { min: 1, max: 4 } },
-    move: { enable: true, speed: 1.5, direction: "none", random: true, straight: false, outModes: { default: "out" } }
-  },
-  interactivity: {
-    events: { onHover: { enable: true, mode: "repulse" }, onClick: { enable: true, mode: "push" } },
-    modes: { repulse: { distance: 100 }, push: { quantity: 4 } }
-  },
-  detectRetina: true
+  fpsLimit: 60,
+  particles: {
+    number: { value: 50, density: { enable: true, area: 800 } },
+    color: { value: "#00ff88" },
+    shape: { type: "circle" },
+    opacity: { value: 0.6 },
+    size: { value: { min: 1, max: 4 } },
+    move: { enable: true, speed: 1.5, direction: "none", random: true, straight: false, outModes: { default: "out" } }
+  },
+  interactivity: {
+    events: { onHover: { enable: true, mode: "repulse" }, onClick: { enable: true, mode: "push" } },
+    modes: { repulse: { distance: 100 }, push: { quantity: 4 } }
+  },
+  detectRetina: true
 });
 </script>
 
